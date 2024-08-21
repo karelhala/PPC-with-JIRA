@@ -8,6 +8,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { WsClient } from "./utils/websocket";
 
 const AvatarDropdown = () => {
   const [avatarEl, setAvatarEl] = React.useState<HTMLButtonElement | null>(
