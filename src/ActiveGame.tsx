@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { WsClient } from "./utils/websocket";
+import { WsClient, WsMessage } from "./utils/websocket";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
@@ -13,11 +13,11 @@ import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
-import { GameContext } from "./utils/gameContext";
+import { GameContexType, GameContext } from "./utils/gameContext";
 
 const cardValues = [0, 1, 2, 3, 5, 8, 13, null];
 
-const onReceiveData = (context) => (event) => {
+const onReceiveData = (context: GameContexType) => (event: WsMessage) => {
   console.log(context, 'this is context!');
   console.log(event, 'this is event!');
 }
