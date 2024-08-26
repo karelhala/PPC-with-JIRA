@@ -1,10 +1,10 @@
 import { createContext } from "react";
-import { WsClient } from "./websocket";
 
 export type GameContexType = {
-  game: string;
-  wsClient: WsClient;
-  setGame: (sessionId: string) => void;
+  user?: {
+    name: string;
+    uuid: string;
+  };
 };
 
 export const GameContext = createContext<GameContexType>({} as GameContexType);

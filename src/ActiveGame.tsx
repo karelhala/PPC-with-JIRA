@@ -6,13 +6,14 @@ import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
 import Coffee from "@mui/icons-material/Coffee";
 import Visibility from "@mui/icons-material/Visibility";
-import BackHandIcon from '@mui/icons-material/BackHand';
+import BackHandIcon from "@mui/icons-material/BackHand";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import Divider from '@mui/material/Divider';
+import Divider from "@mui/material/Divider";
+import { GameContext } from "./utils/gameContext";
 
 const cardValues = [0, 1, 2, 3, 5, 8, 13, null];
 
@@ -27,7 +28,15 @@ const wildCards = [
   },
 ];
 const ActiveSession = () => {
+  const gameContext = React.useContext(GameContext);
   const { id } = useParams();
+
+  React.useEffect(() => {
+    if (gameContext.user?.uuid) {
+      localStorage.setItem('ppc-with-jira-user-uuid', gameContext.user?.uuid)
+      localStorage.setItem('ppc-with-jira-user-name', gameContext.user?.name)
+    }
+  }, [gameContext.user?.uuid, gameContext.user?.name])
 
   const [game, setGame] = React.useState<{
     client: WsClient;
@@ -103,7 +112,9 @@ const ActiveSession = () => {
             >
               <CardContent></CardContent>
             </Card>
-            <Typography>Here will be name</Typography>
+            <Typography sx={{ fontWeight: "bold" }}>
+              {gameContext.user?.name ?? '??'}
+            </Typography>
           </Paper>
         </Grid>
       </Grid>
@@ -162,8 +173,8 @@ const ActiveSession = () => {
                   display: "flex",
                   flexDirection: "column",
                   height: "auto",
-                  paddingRight: '8px',
-                  paddingLeft: '8px',
+                  paddingRight: "8px",
+                  paddingLeft: "8px",
                 }}
               >
                 <Coffee sx={{ fontSize: 30 }} />
@@ -173,30 +184,30 @@ const ActiveSession = () => {
           <Divider orientation="vertical" variant="middle" flexItem />
           {wildCards.map((item) => (
             <Card
-            sx={{
-              transition: "transform 0.15s ease-in-out",
-              "&:hover": {
-                transform: "translate(0px, -20px);",
-                border: "1px solid #03a9f4",
-              },
-              backgroundColor: "#ff1744",
-            }}
-          >
-            <CardActionArea>
-              <CardContent
-                sx={{
-                  p: 2,
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "auto",
-                  paddingRight: '8px',
-                  paddingLeft: '8px',
-                }}
-              >
-                {item.icon ? <item.icon sx={{ fontSize: 30 }}/> : "?"}
-              </CardContent>
-            </CardActionArea>
-          </Card>
+              sx={{
+                transition: "transform 0.15s ease-in-out",
+                "&:hover": {
+                  transform: "translate(0px, -20px);",
+                  border: "1px solid #03a9f4",
+                },
+                backgroundColor: "#ff1744",
+              }}
+            >
+              <CardActionArea>
+                <CardContent
+                  sx={{
+                    p: 2,
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "auto",
+                    paddingRight: "8px",
+                    paddingLeft: "8px",
+                  }}
+                >
+                  {item.icon ? <item.icon sx={{ fontSize: 30 }} /> : "?"}
+                </CardContent>
+              </CardActionArea>
+            </Card>
           ))}
         </Stack>
       </Container>

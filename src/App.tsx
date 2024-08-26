@@ -12,7 +12,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./HomePage";
 import ActiveSession from "./ActiveGame";
 import { GameContexType, GameContext } from "./utils/gameContext";
-import { WsClient } from "./utils/websocket";
+import ActiveUser from "./Components/ActiveUser";
 
 const drawerWidth: number = 240;
 
@@ -42,6 +42,20 @@ const AppBar = styled(MuiAppBar, {
 const defaultTheme = createTheme();
 
 export default function Dashboard() {
+  const [game, setGame] = React.useState<Omit<GameContexType, "setValue">>({});
+  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+  React.useEffect(() => {
+    const userUUID = localStorage.getItem('ppc-with-jira-user-uuid');
+    const userName = localStorage.getItem('ppc-with-jira-user-name');
+    if (userUUID && userName) {
+      setGame({
+        user: {
+          name: userName,
+          uuid: userUUID
+        }
+      })
+    }
+  }, []);
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -57,7 +71,7 @@ export default function Dashboard() {
             >
               Dashboard
             </Typography>
-            <Avatar />
+            <Avatar onSettingsClick={() => setIsOpen(true)} />
           </Toolbar>
         </AppBar>
         <Box
@@ -73,12 +87,28 @@ export default function Dashboard() {
           }}
         >
           <Toolbar />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/:id" element={<ActiveSession />} />
-              <Route path="/" element={<HomePage />}></Route>
-            </Routes>
-          </BrowserRouter>
+          <GameContext.Provider
+            value={{
+              ...(game || {}),
+            }}
+          >
+            <BrowserRouter>
+              <Routes>
+                <Route path="/:id" element={<ActiveSession />} />
+                <Route path="/" element={<HomePage onSetActiveUser={() => setIsOpen(true)}/>}></Route>
+              </Routes>
+            </BrowserRouter>
+          </GameContext.Provider>
+          <ActiveUser isOpen={isOpen} defaultUserName={game.user?.name} setIsOpen={(isOpen, values) => {
+            const uuid = crypto.randomUUID();
+            setIsOpen(isOpen);
+            setGame({
+              user: {
+                name: values?.name || '',
+                uuid
+              }
+            })
+          }}/>
         </Box>
       </Box>
     </ThemeProvider>

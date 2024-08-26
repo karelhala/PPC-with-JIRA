@@ -10,7 +10,7 @@ import Divider from "@mui/material/Divider";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { WsClient } from "./utils/websocket";
 
-const AvatarDropdown = () => {
+const AvatarDropdown: React.FC<{ onSettingsClick: () => void }> = ({ onSettingsClick }) => {
   const [avatarEl, setAvatarEl] = React.useState<HTMLButtonElement | null>(
     null,
   );
@@ -46,7 +46,7 @@ const AvatarDropdown = () => {
       >
         <List disablePadding>
           <ListItem disablePadding>
-            <ListItemButton>
+            <ListItemButton onClick={() => onSettingsClick()}>
               <ListItemText primary="Settings" />
             </ListItemButton>
           </ListItem>

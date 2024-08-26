@@ -4,9 +4,11 @@ import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
+import { GameContext } from "./utils/gameContext";
 
-const HomePage = () => {
+const HomePage: React.FC<{ onSetActiveUser: () => void }> = ({ onSetActiveUser }) => {
   const navigate = useNavigate();
+  const gameContext = React.useContext(GameContext);
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Grid container spacing={3}>
@@ -28,6 +30,9 @@ const HomePage = () => {
           <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
             <Button
               onClick={() => {
+                if (!gameContext.user) {
+                  onSetActiveUser();  
+                }
                 const uuid = crypto.randomUUID();
                 navigate(`/${uuid}`);
               }}
