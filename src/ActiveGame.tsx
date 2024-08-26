@@ -17,6 +17,11 @@ import { GameContext } from "./utils/gameContext";
 
 const cardValues = [0, 1, 2, 3, 5, 8, 13, null];
 
+const onReceiveData = (context) => (event) => {
+  console.log(context, 'this is context!');
+  console.log(event, 'this is event!');
+}
+
 const wildCards = [
   {
     type: "block",
@@ -33,10 +38,18 @@ const ActiveSession = () => {
 
   React.useEffect(() => {
     if (gameContext.user?.uuid) {
-      localStorage.setItem('ppc-with-jira-user-uuid', gameContext.user?.uuid)
-      localStorage.setItem('ppc-with-jira-user-name', gameContext.user?.name)
+      localStorage.setItem('ppc-with-jira-user-uuid', gameContext.user?.uuid);
+      localStorage.setItem('ppc-with-jira-user-name', gameContext.user?.name);
+      game?.client.sendData({
+        gameId: id || '',
+        type: 'user-seen',
+        userMeta: {
+          name: gameContext.user?.name,
+          uuid: gameContext.user?.uuid
+        }
+      })
     }
-  }, [gameContext.user?.uuid, gameContext.user?.name])
+  }, [gameContext.user?.uuid, gameContext.user?.name, id])
 
   const [game, setGame] = React.useState<{
     client: WsClient;
@@ -44,10 +57,12 @@ const ActiveSession = () => {
   } | null>(null);
   React.useEffect(() => {
     if (id) {
-      setGame(() => ({
+      setGame(() => {
+        return ({
         id: id as string,
-        client: new WsClient(),
-      }));
+        client: new WsClient(onReceiveData(gameContext)),
+      })
+    });
     }
     return () => {
       game?.client.close();
@@ -57,8 +72,24 @@ const ActiveSession = () => {
   React.useEffect(() => {
     game?.client.receiveData((event) => {
       console.log(event);
+      if (event.type === 'set-game-info' && event.userMeta.uuid !== gameContext.user?.uuid) {
+        console.log('I am setting game info!');
+      }
     }, id as string);
   }, [game?.id]);
+
+  React.useEffect(() => {
+    if (game?.id && gameContext.user?.uuid) {
+      game?.client.sendData({
+        gameId: id || '',
+        type: 'get-game-info',
+        userMeta: {
+          name: gameContext.user?.name,
+          uuid: gameContext.user?.uuid
+        }
+      })
+    }
+  }, [game?.id, gameContext.user?.uuid])
 
   return (
     <Container maxWidth={false} sx={{ mt: 2, mb: 4 }}>

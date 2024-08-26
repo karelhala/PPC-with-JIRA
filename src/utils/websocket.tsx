@@ -1,3 +1,13 @@
+export type WsMessage = {
+  type: string;
+  gameId: string;
+  userMeta: {
+    name: string;
+    uuid: string;
+  }
+  data?: unknown
+}
+
 export class WsClient {
   private client;
   constructor(
@@ -21,15 +31,15 @@ export class WsClient {
     };
   }
 
-  sendData = (data: string) => {
-    this.client.send(data);
+  sendData = (data: WsMessage) => {
+    this.client.send(JSON.stringify(data));
   };
 
-  receiveData = (callback: (event: unknown) => void, id: string) => {
+  receiveData = (callback: (event: WsMessage) => void, id: string) => {
     this.client.addEventListener("message", (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.id === id) {
+        if (data.gameId === id) {
           callback(data);
         }
       } catch (e) {
