@@ -12,7 +12,7 @@ import { WsClient } from "./utils/websocket";
 
 const AvatarDropdown = () => {
   const [avatarEl, setAvatarEl] = React.useState<HTMLButtonElement | null>(
-    null
+    null,
   );
 
   const handleAvatarClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -26,7 +26,7 @@ const AvatarDropdown = () => {
   const open = Boolean(avatarEl);
   const id = open ? "simpe-popover" : undefined;
 
-  const [token, setToken] = React.useState('');
+  const [token, setToken] = React.useState("");
 
   return (
     <div>
@@ -41,7 +41,7 @@ const AvatarDropdown = () => {
         onClose={handleAvatarClose}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "left"
+          horizontal: "left",
         }}
       >
         <List disablePadding>
@@ -53,7 +53,7 @@ const AvatarDropdown = () => {
           <Divider />
           <ListItem disablePadding>
             <ListItemButton>
-              <ListItemText primary={token !== '' ? 'Log out' : 'Log in'} />
+              <ListItemText primary={token !== "" ? "Log out" : "Log in"} />
             </ListItemButton>
           </ListItem>
         </List>
