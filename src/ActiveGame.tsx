@@ -5,26 +5,25 @@ import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
 import Coffee from "@mui/icons-material/Coffee";
+import Visibility from "@mui/icons-material/Visibility";
+import BackHandIcon from '@mui/icons-material/BackHand';
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Divider from '@mui/material/Divider';
 
 const cardValues = [0, 1, 2, 3, 5, 8, 13, null];
 
 const wildCards = [
   {
     type: "block",
-    icon: "",
+    icon: BackHandIcon,
   },
   {
     type: "reveal",
-    icon: "",
-  },
-  {
-    type: "ultimate",
-    icon: "",
+    icon: Visibility,
   },
 ];
 const ActiveSession = () => {
@@ -163,41 +162,41 @@ const ActiveSession = () => {
                   display: "flex",
                   flexDirection: "column",
                   height: "auto",
+                  paddingRight: '8px',
+                  paddingLeft: '8px',
                 }}
               >
                 <Coffee sx={{ fontSize: 30 }} />
               </CardContent>
             </CardActionArea>
           </Card>
+          <Divider orientation="vertical" variant="middle" flexItem />
           {wildCards.map((item) => (
             <Card
-              sx={{
-                transition: "transform 0.15s ease-in-out",
-                "&:hover": {
-                  transform: "translate(0px, -20px);",
-                  border: "1px solid #03a9f4",
-                },
-                width: "3rem",
-                backgroundColor: "#ff1744",
-              }}
-            >
-              <CardActionArea>
-                <CardContent
-                  sx={{
-                    p: 2,
-                    paddingLeft: 0,
-                    paddingRight: 0,
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "auto",
-                    fontSize: 30,
-                    textAlign: "center",
-                  }}
-                >
-                  {item.icon ?? "?"}
-                </CardContent>
-              </CardActionArea>
-            </Card>
+            sx={{
+              transition: "transform 0.15s ease-in-out",
+              "&:hover": {
+                transform: "translate(0px, -20px);",
+                border: "1px solid #03a9f4",
+              },
+              backgroundColor: "#ff1744",
+            }}
+          >
+            <CardActionArea>
+              <CardContent
+                sx={{
+                  p: 2,
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "auto",
+                  paddingRight: '8px',
+                  paddingLeft: '8px',
+                }}
+              >
+                {item.icon ? <item.icon sx={{ fontSize: 30 }}/> : "?"}
+              </CardContent>
+            </CardActionArea>
+          </Card>
           ))}
         </Stack>
       </Container>
