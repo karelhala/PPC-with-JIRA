@@ -6,7 +6,9 @@ import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
 import { GameContext } from "./utils/gameContext";
 
-const HomePage: React.FC<{ onSetActiveUser: () => void }> = ({ onSetActiveUser }) => {
+const HomePage: React.FC<{ onSetActiveUser: () => void }> = ({
+  onSetActiveUser,
+}) => {
   const navigate = useNavigate();
   const gameContext = React.useContext(GameContext);
   return (
@@ -31,7 +33,7 @@ const HomePage: React.FC<{ onSetActiveUser: () => void }> = ({ onSetActiveUser }
             <Button
               onClick={() => {
                 if (!gameContext.user) {
-                  onSetActiveUser();  
+                  onSetActiveUser();
                 }
                 const uuid = crypto.randomUUID();
                 navigate(`/${uuid}`);

@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { WsClient, WsMessage } from "./utils/websocket";
+import { WsClient, WsMessage, isWsMessage } from "./utils/websocket";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
@@ -17,10 +17,11 @@ import { GameContexType, GameContext } from "./utils/gameContext";
 
 const cardValues = [0, 1, 2, 3, 5, 8, 13, null];
 
-const onReceiveData = (context: GameContexType) => (event: WsMessage) => {
-  console.log(context, 'this is context!');
-  console.log(event, 'this is event!');
-}
+const onReceiveData =
+  (context: GameContexType) => (event: WsMessage | string) => {
+    console.log(context, "this is context!");
+    console.log(event, "this is event!");
+  };
 
 const wildCards = [
   {
@@ -38,18 +39,18 @@ const ActiveSession = () => {
 
   React.useEffect(() => {
     if (gameContext.user?.uuid) {
-      localStorage.setItem('ppc-with-jira-user-uuid', gameContext.user?.uuid);
-      localStorage.setItem('ppc-with-jira-user-name', gameContext.user?.name);
+      localStorage.setItem("ppc-with-jira-user-uuid", gameContext.user?.uuid);
+      localStorage.setItem("ppc-with-jira-user-name", gameContext.user?.name);
       game?.client.sendData({
-        gameId: id || '',
-        type: 'user-seen',
+        gameId: id || "",
+        type: "user-seen",
         userMeta: {
           name: gameContext.user?.name,
-          uuid: gameContext.user?.uuid
-        }
-      })
+          uuid: gameContext.user?.uuid,
+        },
+      });
     }
-  }, [gameContext.user?.uuid, gameContext.user?.name, id])
+  }, [gameContext.user?.uuid, gameContext.user?.name, id]);
 
   const [game, setGame] = React.useState<{
     client: WsClient;
@@ -58,11 +59,11 @@ const ActiveSession = () => {
   React.useEffect(() => {
     if (id) {
       setGame(() => {
-        return ({
-        id: id as string,
-        client: new WsClient(onReceiveData(gameContext)),
-      })
-    });
+        return {
+          id: id as string,
+          client: new WsClient(id, onReceiveData(gameContext)),
+        };
+      });
     }
     return () => {
       game?.client.close();
@@ -72,8 +73,12 @@ const ActiveSession = () => {
   React.useEffect(() => {
     game?.client.receiveData((event) => {
       console.log(event);
-      if (event.type === 'set-game-info' && event.userMeta.uuid !== gameContext.user?.uuid) {
-        console.log('I am setting game info!');
+      if (
+        isWsMessage(event) &&
+        event.type === "set-game-info" &&
+        event.userMeta.uuid !== gameContext.user?.uuid
+      ) {
+        console.log("I am setting game info!");
       }
     }, id as string);
   }, [game?.id]);
@@ -81,15 +86,15 @@ const ActiveSession = () => {
   React.useEffect(() => {
     if (game?.id && gameContext.user?.uuid) {
       game?.client.sendData({
-        gameId: id || '',
-        type: 'get-game-info',
+        gameId: id || "",
+        type: "get-game-info",
         userMeta: {
           name: gameContext.user?.name,
-          uuid: gameContext.user?.uuid
-        }
-      })
+          uuid: gameContext.user?.uuid,
+        },
+      });
     }
-  }, [game?.id, gameContext.user?.uuid])
+  }, [game?.id, gameContext.user?.uuid]);
 
   return (
     <Container maxWidth={false} sx={{ mt: 2, mb: 4 }}>
@@ -144,7 +149,7 @@ const ActiveSession = () => {
               <CardContent></CardContent>
             </Card>
             <Typography sx={{ fontWeight: "bold" }}>
-              {gameContext.user?.name ?? '??'}
+              {gameContext.user?.name ?? "??"}
             </Typography>
           </Paper>
         </Grid>

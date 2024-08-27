@@ -6,17 +6,20 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { uniqueNamesGenerator, names } from 'unique-names-generator';
+import { uniqueNamesGenerator, names } from "unique-names-generator";
 
 const ActiveUser: React.FC<{
   isOpen: boolean;
-  setIsOpen: (isOpen: boolean, data?: {
-    name: string
-  }) => void;
+  setIsOpen: (
+    isOpen: boolean,
+    data?: {
+      name: string;
+    },
+  ) => void;
   defaultUserName?: string;
 }> = ({ isOpen = false, setIsOpen, defaultUserName }) => {
   const characterName: string = uniqueNamesGenerator({
-    dictionaries: [names]
+    dictionaries: [names],
   });
   return (
     <Dialog
@@ -27,7 +30,10 @@ const ActiveUser: React.FC<{
         onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
           event.preventDefault();
           const formData = new FormData(event.currentTarget);
-          setIsOpen(false, Object.fromEntries((formData as any).entries()) as { name: string });
+          setIsOpen(
+            false,
+            Object.fromEntries((formData as any).entries()) as { name: string },
+          );
         },
       }}
     >

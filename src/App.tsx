@@ -13,8 +13,12 @@ import HomePage from "./HomePage";
 import ActiveSession from "./ActiveGame";
 import { GameContexType, GameContext } from "./utils/gameContext";
 import ActiveUser from "./Components/ActiveUser";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import Drawer from "@mui/material/Drawer";
+import AvailableJiraCards from "./Components/AvailableJiraCards";
 
-const drawerWidth: number = 240;
+const drawerWidth: number = 480;
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
@@ -42,18 +46,19 @@ const AppBar = styled(MuiAppBar, {
 const defaultTheme = createTheme();
 
 export default function Dashboard() {
-  const [game, setGame] = React.useState<Omit<GameContexType, "setValue">>({});
+  const [game, setGame] = React.useState<GameContexType>({});
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   React.useEffect(() => {
-    const userUUID = localStorage.getItem('ppc-with-jira-user-uuid');
-    const userName = localStorage.getItem('ppc-with-jira-user-name');
+    const userUUID = localStorage.getItem("ppc-with-jira-user-uuid");
+    const userName = localStorage.getItem("ppc-with-jira-user-name");
     if (userUUID && userName) {
       setGame({
         user: {
           name: userName,
-          uuid: userUUID
-        }
-      })
+          uuid: userUUID,
+        },
+      });
     }
   }, []);
   return (
@@ -71,6 +76,14 @@ export default function Dashboard() {
             >
               Dashboard
             </Typography>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="end"
+              onClick={() => setIsDrawerOpen((isOpen) => !isOpen)}
+            >
+              <MenuIcon />
+            </IconButton>
             <Avatar onSettingsClick={() => setIsOpen(true)} />
           </Toolbar>
         </AppBar>
@@ -95,21 +108,43 @@ export default function Dashboard() {
             <BrowserRouter>
               <Routes>
                 <Route path="/:id" element={<ActiveSession />} />
-                <Route path="/" element={<HomePage onSetActiveUser={() => setIsOpen(true)}/>}></Route>
+                <Route
+                  path="/"
+                  element={<HomePage onSetActiveUser={() => setIsOpen(true)} />}
+                ></Route>
               </Routes>
             </BrowserRouter>
           </GameContext.Provider>
-          <ActiveUser isOpen={isOpen} defaultUserName={game.user?.name} setIsOpen={(isOpen, values) => {
-            const uuid = crypto.randomUUID();
-            setIsOpen(isOpen);
-            setGame({
-              user: {
-                name: values?.name || '',
-                uuid
-              }
-            })
-          }}/>
+          <ActiveUser
+            isOpen={isOpen}
+            defaultUserName={game.user?.name}
+            setIsOpen={(isOpen, values) => {
+              const uuid = crypto.randomUUID();
+              setIsOpen(isOpen);
+              setGame({
+                user: {
+                  name: values?.name || "",
+                  uuid,
+                },
+              });
+            }}
+          />
         </Box>
+        <Drawer
+          sx={{
+            width: drawerWidth,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              width: drawerWidth,
+            },
+            ...(!isDrawerOpen && { display: "none" }),
+          }}
+          variant="persistent"
+          anchor="right"
+          open={isDrawerOpen}
+        >
+          <AvailableJiraCards />
+        </Drawer>
       </Box>
     </ThemeProvider>
   );

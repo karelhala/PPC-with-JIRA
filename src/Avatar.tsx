@@ -7,10 +7,10 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { WsClient } from "./utils/websocket";
 
-const AvatarDropdown: React.FC<{ onSettingsClick: () => void }> = ({ onSettingsClick }) => {
+const AvatarDropdown: React.FC<{ onSettingsClick: () => void }> = ({
+  onSettingsClick,
+}) => {
   const [avatarEl, setAvatarEl] = React.useState<HTMLButtonElement | null>(
     null,
   );

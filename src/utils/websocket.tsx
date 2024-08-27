@@ -4,14 +4,35 @@ export type WsMessage = {
   userMeta: {
     name: string;
     uuid: string;
+  };
+  data?: unknown;
+};
+
+const processData = (
+  event: { data: string },
+  callback: (event: WsMessage | string) => void,
+  id: string,
+) => {
+  try {
+    const data = JSON.parse(event.data);
+    if (data.gameId === id) {
+      callback(data);
+    }
+  } catch (e) {
+    callback(event.data);
   }
-  data?: unknown
+};
+
+export function isWsMessage(event: WsMessage | string): event is WsMessage {
+  return (event as WsMessage).type !== undefined;
 }
 
 export class WsClient {
   private client;
   constructor(
-    onMessage?: (event: unknown) => unknown,
+    id: string,
+    onMessage?: (event: WsMessage | string) => void,
+    onOpen?: (event: unknown) => void,
     onClose?: (event: unknown) => void,
     onError?: (event: unknown) => void,
   ) {
@@ -19,7 +40,9 @@ export class WsClient {
       `${process.env.NODE_ENV === "development" ? process.env.REACT_APP_WS_URL : process.env.REACT_APP_WS_URL_PROD}?api_key=${process.env.REACT_APP_WS_API_KEY}`,
     );
     this.client.onmessage = (event) => {
-      onMessage?.(event?.data);
+      if (onMessage) {
+        processData(event, onMessage, id);
+      }
     };
 
     this.client.onclose = (event) => {
@@ -32,19 +55,14 @@ export class WsClient {
   }
 
   sendData = (data: WsMessage) => {
-    this.client.send(JSON.stringify(data));
+    if (this.client.readyState) {
+      this.client.send(JSON.stringify(data));
+    }
   };
 
-  receiveData = (callback: (event: WsMessage) => void, id: string) => {
+  receiveData = (callback: (event: WsMessage | string) => void, id: string) => {
     this.client.addEventListener("message", (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.gameId === id) {
-          callback(data);
-        }
-      } catch (e) {
-        callback(event.data);
-      }
+      processData(event, callback, id);
     });
   };
 
