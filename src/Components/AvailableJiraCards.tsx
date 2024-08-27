@@ -1,4 +1,4 @@
-import React, { RefObject } from "react";
+import React from "react";
 import {
   Button,
   Card,
@@ -10,13 +10,11 @@ import {
   Typography,
 } from "@mui/material";
 import Stack from "@mui/material/Stack";
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { GameContext } from "../utils/gameContext";
 
 const AvailableJiraCards = () => {
-  const [jiraIssues, setJiraIssues] = React.useState<{
-    key?: string;
-    description: string
-  }[]>([]);
+  const gameContext = React.useContext(GameContext);
   return (
     <Stack
       spacing={2}
@@ -30,13 +28,18 @@ const AvailableJiraCards = () => {
         noValidate
         onSubmit={(event) => {
           event.preventDefault();
-          const { 'jira-key': jiraKey, 'jira-description': jiraDescription } = Object.fromEntries(
-            (new FormData(event.currentTarget) as any).entries(),
-          );
-          setJiraIssues((issues) => [...issues, {
-            key: jiraKey,
-            description: jiraDescription
-          }]);
+          const { "jira-key": jiraKey, "jira-description": jiraDescription } =
+            Object.fromEntries(
+              (new FormData(event.currentTarget) as any).entries(),
+            );
+          const uuid = crypto.randomUUID();
+          gameContext.setAvailableTickets?.([
+            {
+              key: jiraKey,
+              description: jiraDescription,
+              id: uuid,
+            },
+          ]);
         }}
       >
         <CardContent>
@@ -62,24 +65,26 @@ const AvailableJiraCards = () => {
           <Button type="submit">Add to refinement</Button>
         </CardActions>
       </Card>
-      {jiraIssues.map((item) => (<Card>
-        <CardHeader
-        action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
-          </IconButton>
-        }
-        title={item.key}
-      />
-        <CardContent>
-          <Stack spacing={2}>
-            <Typography>{item.description}</Typography>
-          </Stack>
-        </CardContent>
-        <CardActions sx={{ justifyContent: "center" }}>
-          <Button>Vote this issue</Button>
-        </CardActions>
-      </Card>))}
+      {gameContext.availableTickets?.map((item) => (
+        <Card>
+          <CardHeader
+            action={
+              <IconButton aria-label="settings">
+                <MoreVertIcon />
+              </IconButton>
+            }
+            title={item.key}
+          />
+          <CardContent>
+            <Stack spacing={2}>
+              <Typography>{item.description}</Typography>
+            </Stack>
+          </CardContent>
+          <CardActions sx={{ justifyContent: "center" }}>
+            <Button>Vote this issue</Button>
+          </CardActions>
+        </Card>
+      ))}
     </Stack>
   );
 };

@@ -36,6 +36,7 @@ const HomePage: React.FC<{ onSetActiveUser: () => void }> = ({
                   onSetActiveUser();
                 }
                 const uuid = crypto.randomUUID();
+                gameContext.setCurrGame?.(uuid);
                 navigate(`/${uuid}`);
               }}
             >
