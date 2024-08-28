@@ -52,45 +52,102 @@ const ActiveSession = () => {
               justifyContent: "center",
             }}
           >
-            <Card
-              variant="outlined"
-              sx={{
-                minWidth: "20rem",
-                minHeight: "10rem",
-                textAlign: "center",
-                alignContent: "center",
-                backgroundColor: "#03DAC6",
-                borderRadius: 10,
-              }}
-            >
-              <CardContent
-                sx={{
-                  p: 2,
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "auto",
-                }}
-              >
-                Start by picking your cards!
-              </CardContent>
-            </Card>
-            <Card
-              variant="outlined"
-              sx={{
-                minWidth: "1rem",
-                height: "4rem",
-                textAlign: "center",
-                alignContent: "center",
-                backgroundColor: "#f5f5f5",
-                mt: 2,
-                mb: 4,
-              }}
-            >
-              <CardContent></CardContent>
-            </Card>
-            <Typography sx={{ fontWeight: "bold" }}>
-              {gameContext.user?.name ?? "??"}
-            </Typography>
+            <Stack>
+              <Grid container maxWidth="sm">
+                {Array(3)
+                  .fill(0)
+                  .map((i, index) => (
+                    <Grid
+                      key={index}
+                      lg={12 / 3}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Card
+                        variant="outlined"
+                        sx={{
+                          width: "2rem",
+                          height: "4rem",
+                          textAlign: "center",
+                          alignContent: "center",
+                          backgroundColor: "#f5f5f5",
+                          mt: 2,
+                          mb: 4,
+                        }}
+                      >
+                        <CardContent></CardContent>
+                      </Card>
+                      <Typography sx={{ fontWeight: "bold" }}>
+                        {gameContext.activeUsers?.[index]?.name ?? "??"}
+                      </Typography>
+                    </Grid>
+                  ))}
+              </Grid>
+              <Grid container maxWidth="md">
+                <Grid lg={12}>
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      minWidth: "20rem",
+                      minHeight: "10rem",
+                      textAlign: "center",
+                      alignContent: "center",
+                      backgroundColor: "#03DAC6",
+                      borderRadius: 10,
+                    }}
+                  >
+                    <CardContent
+                      sx={{
+                        p: 2,
+                        display: "flex",
+                        flexDirection: "column",
+                        height: "auto",
+                      }}
+                    >
+                      Start by picking your cards!
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+              <Grid container maxWidth="sm">
+                {gameContext.activeUsers?.length &&
+                  gameContext.activeUsers?.length > 3 &&
+                  Array(3)
+                    .fill(0)
+                    .map((i, index) => (
+                      <Grid
+                        key={index}
+                        lg={12 / 3}
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Card
+                          variant="outlined"
+                          sx={{
+                            width: "1rem",
+                            height: "4rem",
+                            textAlign: "center",
+                            alignContent: "center",
+                            backgroundColor: "#f5f5f5",
+                            mt: 2,
+                            mb: 4,
+                          }}
+                        >
+                          <CardContent></CardContent>
+                        </Card>
+                        <Typography sx={{ fontWeight: "bold" }}>
+                          {gameContext.activeUsers?.[index + 3]?.name ?? "??"}
+                        </Typography>
+                      </Grid>
+                    ))}
+              </Grid>
+            </Stack>
           </Paper>
         </Grid>
       </Grid>

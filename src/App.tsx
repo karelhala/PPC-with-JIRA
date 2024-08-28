@@ -23,7 +23,6 @@ const eventMapper = (
   },
   "get-game-info": (event: WsMessage) => {
     if (context.user && context.currGameId) {
-      console.log("sending data!", context);
       context.wsClient.sendData({
         userMeta: context.user,
         type: "set-game-info",
