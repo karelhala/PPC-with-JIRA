@@ -88,6 +88,17 @@ export class WsClient {
     });
   };
 
+  setOnMessage = (
+    onMessage: (event: WsMessage | string) => void,
+    id: string,
+  ) => {
+    this.client.onmessage = (event) => {
+      if (onMessage) {
+        processData(event, onMessage, id);
+      }
+    };
+  };
+
   close = () => {
     this.client.close();
   };
