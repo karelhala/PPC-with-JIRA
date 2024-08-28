@@ -28,6 +28,8 @@ export function isWsMessage(event: WsMessage | string): event is WsMessage {
 }
 
 export class WsClient {
+  private static instance: WsClient;
+
   private client;
   constructor(
     id: string,
@@ -52,6 +54,26 @@ export class WsClient {
     this.client.onerror = (event) => {
       onError?.(event);
     };
+  }
+
+  public static getInstance(
+    id: string,
+    onMessage?: (event: WsMessage | string) => void,
+    onOpen?: (event: unknown) => void,
+    onClose?: (event: unknown) => void,
+    onError?: (event: unknown) => void,
+  ): WsClient {
+    if (!WsClient.instance) {
+      WsClient.instance = new WsClient(
+        id,
+        onMessage,
+        onOpen,
+        onClose,
+        onError,
+      );
+    }
+
+    return WsClient.instance;
   }
 
   sendData = (data: WsMessage) => {

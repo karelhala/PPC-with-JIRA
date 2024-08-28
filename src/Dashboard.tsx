@@ -90,7 +90,12 @@ export default function Dashboard() {
           <Toolbar />
           <BrowserRouter>
             <Routes>
-              <Route path="/:id" element={<ActiveSession />} />
+              <Route
+                path="/:id"
+                element={
+                  <ActiveSession onSetActiveUser={() => setIsOpen(true)} />
+                }
+              />
               <Route
                 path="/"
                 element={<HomePage onSetActiveUser={() => setIsOpen(true)} />}
