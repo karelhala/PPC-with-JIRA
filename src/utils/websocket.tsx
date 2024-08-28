@@ -5,7 +5,7 @@ export type WsMessage = {
     name: string;
     uuid: string;
   };
-  data?: unknown;
+  data?: any;
 };
 
 const processData = (
@@ -78,12 +78,12 @@ export class WsClient {
 
   sendData = (data: WsMessage) => {
     if (this.client.readyState) {
-      this.client.send(JSON.stringify(data));
+      WsClient.instance.client.send(JSON.stringify(data));
     }
   };
 
   receiveData = (callback: (event: WsMessage | string) => void, id: string) => {
-    this.client.addEventListener("message", (event) => {
+    WsClient.instance.client.addEventListener("message", (event) => {
       processData(event, callback, id);
     });
   };
@@ -92,7 +92,7 @@ export class WsClient {
     onMessage: (event: WsMessage | string) => void,
     id: string,
   ) => {
-    this.client.onmessage = (event) => {
+    WsClient.instance.client.onmessage = (event) => {
       if (onMessage) {
         processData(event, onMessage, id);
       }
@@ -100,6 +100,10 @@ export class WsClient {
   };
 
   close = () => {
-    this.client.close();
+    WsClient.instance.client.close();
   };
+
+  setOnOpen = (onOpen: any) => {
+    WsClient.instance.client.onopen = onOpen;
+  }
 }

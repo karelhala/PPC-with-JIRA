@@ -34,6 +34,12 @@ const eventMapper = (
   "set-game-info": (event: WsMessage) => {
     callbacks.setActiveUsers?.(event.userMeta);
   },
+  "card-selected": (event: WsMessage) => {
+    callbacks.setActiveUsers?.({
+      ...event.userMeta,
+      selectedCard: event?.data?.card || 0,
+    });
+  },
 });
 
 const App = () => {
@@ -44,7 +50,7 @@ const App = () => {
   const callbacks = {
     setAvailableTickets: (tickets: TicketType[]) =>
       setGame((game) => ({ ...game, availableTickets: tickets })),
-    setActiveUsers: (user: UserType) =>
+    setActiveUsers: (user: UserType & { selectedCard?: number }) =>
       setGame((game) => {
         const foundUserIndex = game.activeUsers?.findIndex(
           ({ uuid }) => user.uuid === uuid,
@@ -62,7 +68,7 @@ const App = () => {
       setGame((game) => ({ ...game, currGameId: id })),
     setUser: (newUser: UserType) =>
       setGame((game) => ({ ...game, user: newUser })),
-    setDrawnCards: (cards: unknown[]) =>
+    setDrawnCards: (cards: unknown) =>
       setGame((game) => ({ ...game, drawnCards: cards })),
   };
 
@@ -81,7 +87,7 @@ const App = () => {
   }, []);
 
   React.useEffect(() => {
-    if (game.user?.uuid) {
+    if (game.user?.uuid && game.currGameId) {
       game.wsClient.sendData({
         gameId: game.currGameId || "",
         type: "user-seen",
@@ -92,7 +98,7 @@ const App = () => {
       });
       callbacks.setActiveUsers(game.user);
     }
-  }, [game.user?.uuid, game.user?.name]);
+  }, [game.user?.uuid, game.user?.name, game.currGameId]);
 
   const onReceiveData = (event: WsMessage | string) => {
     if (isWsMessage(event)) {

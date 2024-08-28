@@ -1,34 +1,73 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { WsClient, WsMessage, isWsMessage } from "./utils/websocket";
+import { isWsMessage } from "./utils/websocket";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import Container from "@mui/material/Container";
 import Coffee from "@mui/icons-material/Coffee";
-import Visibility from "@mui/icons-material/Visibility";
-import BackHandIcon from "@mui/icons-material/BackHand";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
-import { GameContext } from "./utils/gameContext";
+import { GameContext, UserType } from "./utils/gameContext";
+import { Button } from "@mui/material";
 
 const cardValues = [0, 1, 2, 3, 5, 8, 13, null];
 
-const wildCards = [
-  {
-    type: "block",
-    icon: BackHandIcon,
-  },
-  {
-    type: "reveal",
-    icon: Visibility,
-  },
+const wildCards: { type: string; icon: any }[] = [
+  // {
+  //   type: "block",
+  //   icon: BackHandIcon,
+  // },
+  // {
+  //   type: "reveal",
+  //   icon: Visibility,
+  // },
 ];
 const ActiveSession = () => {
   const gameContext = React.useContext(GameContext);
+  const [activeCard, setActiveCard] = React.useState<
+    undefined | number | null
+  >();
+  const [cardPicked, setCardPicked] = React.useState(false);
+  const [revealCards, setRevealCards] = React.useState(false);
+  const [usersSelection, setUsersSelection] = React.useState<
+    (UserType & { selectedCard?: number })[]
+  >([]);
+  console.log(activeCard, "this is activeCard!");
+  if (gameContext.currGameId) {
+    gameContext.wsClient.receiveData((event) => {
+      if (isWsMessage(event) && event.type === "card-selected") {
+        setCardPicked(true);
+        if (gameContext.activeUsers) {
+          const usersWithCards = gameContext.activeUsers?.map((user) => ({
+            ...user,
+            ...(user.uuid === event.userMeta.uuid && {
+              selectedCard: event.data.card,
+            }),
+          }));
+          setUsersSelection(usersWithCards);
+        }
+      } else if (isWsMessage(event) && event.type === "start-new-game") {
+        setCardPicked(false);
+        setActiveCard(undefined);
+        if (gameContext.activeUsers) {
+          const usersWithCards = gameContext.activeUsers?.map((user) => ({
+            ...user,
+            selectedCard: undefined,
+          }));
+          setUsersSelection(usersWithCards);
+          usersWithCards.forEach((user) => {
+            gameContext.setActiveUsers?.(user);
+          });
+        }
+      } else if (isWsMessage(event) && event.type === "reveal-cards") {
+        setRevealCards(true);
+      }
+    }, gameContext.currGameId);
+  }
   const { id } = useParams();
   React.useEffect(() => {
     if (id) {
@@ -76,9 +115,37 @@ const ActiveSession = () => {
                           backgroundColor: "#f5f5f5",
                           mt: 2,
                           mb: 4,
+                          ...((usersSelection.find(
+                            ({ uuid, selectedCard }) =>
+                              uuid === gameContext.activeUsers?.[index]?.uuid &&
+                              selectedCard !== undefined,
+                          ) ||
+                            (activeCard &&
+                              gameContext.user?.uuid ===
+                                gameContext.activeUsers?.[index]?.uuid)) && {
+                            border: "1px solid #03a9f4",
+                          }),
                         }}
                       >
-                        <CardContent></CardContent>
+                        <CardContent
+                          sx={{
+                            padding: 0,
+                            paddingTop: "16px",
+                          }}
+                        >
+                          <Typography sx={{ fontWeight: "bold" }}>
+                            {revealCards &&
+                              (usersSelection.find(
+                                ({ uuid, selectedCard }) =>
+                                  uuid ===
+                                    gameContext.activeUsers?.[index]?.uuid &&
+                                  selectedCard !== undefined,
+                              )?.selectedCard ||
+                                (gameContext.user?.uuid ===
+                                  gameContext.activeUsers?.[index]?.uuid &&
+                                  activeCard))}
+                          </Typography>
+                        </CardContent>
                       </Card>
                       <Typography sx={{ fontWeight: "bold" }}>
                         {gameContext.activeUsers?.[index]?.name ?? "??"}
@@ -107,7 +174,43 @@ const ActiveSession = () => {
                         height: "auto",
                       }}
                     >
-                      Start by picking your cards!
+                      {cardPicked && !revealCards && (
+                        <Button
+                          onClick={() => {
+                            setRevealCards(true);
+                            if (gameContext.currGameId && gameContext.user) {
+                              gameContext.wsClient.sendData({
+                                gameId: gameContext.currGameId,
+                                userMeta: gameContext.user,
+                                type: "reveal-cards",
+                              });
+                            }
+                          }}
+                        >
+                          Reveal Cards
+                        </Button>
+                      )}
+                      {cardPicked && revealCards && (
+                        <Button
+                          onClick={() => {
+                            setRevealCards(false);
+                            setActiveCard(undefined);
+                            setCardPicked(false);
+                            if (gameContext.currGameId && gameContext.user) {
+                              gameContext.wsClient.sendData({
+                                gameId: gameContext.currGameId,
+                                userMeta: gameContext.user,
+                                type: "start-new-game",
+                              });
+                            }
+                          }}
+                        >
+                          Start New game
+                        </Button>
+                      )}
+                      {!cardPicked &&
+                        !revealCards &&
+                        "Start by picking your cards!"}
                     </CardContent>
                   </Card>
                 </Grid>
@@ -130,16 +233,47 @@ const ActiveSession = () => {
                         <Card
                           variant="outlined"
                           sx={{
-                            width: "1rem",
+                            width: "2rem",
                             height: "4rem",
                             textAlign: "center",
                             alignContent: "center",
                             backgroundColor: "#f5f5f5",
                             mt: 2,
                             mb: 4,
+                            ...((usersSelection.find(
+                              ({ uuid, selectedCard }) =>
+                                uuid ===
+                                  gameContext.activeUsers?.[index + 3]?.uuid &&
+                                selectedCard !== undefined,
+                            ) ||
+                              (activeCard &&
+                                gameContext.user?.uuid ===
+                                  gameContext.activeUsers?.[index + 3]
+                                    ?.uuid)) && {
+                              border: "1px solid #03a9f4",
+                            }),
                           }}
                         >
-                          <CardContent></CardContent>
+                          <CardContent
+                            sx={{
+                              padding: 0,
+                              paddingTop: "16px",
+                            }}
+                          >
+                            <Typography sx={{ fontWeight: "bold" }}>
+                              {revealCards &&
+                                (usersSelection.find(
+                                  ({ uuid, selectedCard }) =>
+                                    uuid ===
+                                      gameContext.activeUsers?.[index + 3]
+                                        ?.uuid && selectedCard !== undefined,
+                                )?.selectedCard ||
+                                  (gameContext.user?.uuid ===
+                                    gameContext.activeUsers?.[index + 3]
+                                      ?.uuid &&
+                                    activeCard))}
+                            </Typography>
+                          </CardContent>
                         </Card>
                         <Typography sx={{ fontWeight: "bold" }}>
                           {gameContext.activeUsers?.[index + 3]?.name ?? "??"}
@@ -169,10 +303,43 @@ const ActiveSession = () => {
                   transform: "translate(0px, -20px);",
                   border: "1px solid #03a9f4",
                 },
+                ...(activeCard === item && {
+                  transform: "translate(0px, -20px);",
+                  border: "1px solid #03a9f4",
+                }),
                 width: "3rem",
               }}
             >
-              <CardActionArea>
+              <CardActionArea
+                onClick={() => {
+                  if (
+                    gameContext.wsClient &&
+                    gameContext.currGameId &&
+                    gameContext.user
+                  ) {
+                    if (revealCards) {
+                      return;
+                    }
+                    setActiveCard((prev) => {
+                      const currCard = prev === item ? undefined : item;
+
+                      gameContext.setDrawnCards?.(currCard);
+                      setCardPicked(true);
+                      if (gameContext.currGameId && gameContext.user) {
+                        gameContext.wsClient.sendData({
+                          gameId: gameContext.currGameId,
+                          type: "card-selected",
+                          userMeta: gameContext.user,
+                          data: {
+                            card: currCard,
+                          },
+                        });
+                      }
+                      return currCard;
+                    });
+                  }
+                }}
+              >
                 <CardContent
                   sx={{
                     p: 2,

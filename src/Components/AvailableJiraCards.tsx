@@ -11,10 +11,39 @@ import {
 } from "@mui/material";
 import Stack from "@mui/material/Stack";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { GameContext } from "../utils/gameContext";
+import { GameContext, TicketType } from "../utils/gameContext";
+import { isWsMessage } from "../utils/websocket";
 
 const AvailableJiraCards = () => {
   const gameContext = React.useContext(GameContext);
+  if (gameContext.currGameId ) {
+    gameContext.wsClient.receiveData((ev) => {
+      if (isWsMessage(ev) && gameContext.user && gameContext.currGameId) {
+        console.log('I received data', ev.data);
+        if (ev.type === 'get-all-cards' && gameContext.user) {
+          gameContext.wsClient.sendData({
+            userMeta: gameContext.user,
+            type: 'set-all-cards',
+            gameId: gameContext.currGameId,
+            data: gameContext.availableTickets
+          })
+        } else if (ev.type === 'set-new-card' && gameContext.user.uuid !== ev.userMeta.uuid) {
+          gameContext.setAvailableTickets?.(([
+            ...gameContext.availableTickets || [],
+            ev.data
+          ]));
+        } else if (ev.type === 'set-all-cards' && gameContext.user.uuid !== ev.userMeta.uuid) {
+          console.log('I received data', ev.data);
+          gameContext.setAvailableTickets?.(ev.data);
+        } else if (ev.type === 'vote-now' && gameContext.availableTickets) {
+          gameContext.setAvailableTickets?.(gameContext.availableTickets.map((ticket) => ({
+            ...ticket,
+            isSelected: ev.data.id === ticket.id
+          })));
+        }
+      }
+    }, gameContext.currGameId)
+  }
   return (
     <Stack
       spacing={2}
@@ -33,13 +62,24 @@ const AvailableJiraCards = () => {
               (new FormData(event.currentTarget) as any).entries(),
             );
           const uuid = crypto.randomUUID();
-          gameContext.setAvailableTickets?.([
-            {
+          if (gameContext.user && gameContext.currGameId) {
+            const newCard = {
               key: jiraKey,
               description: jiraDescription,
               id: uuid,
-            },
-          ]);
+            }
+
+            gameContext.setAvailableTickets?.(([
+              ...gameContext.availableTickets || [],
+              newCard
+            ]));
+            gameContext.wsClient.sendData({
+              userMeta: gameContext.user,
+              type: 'set-new-card',
+              gameId: gameContext.currGameId,
+              data: newCard
+            })
+          }
         }}
       >
         <CardContent>
@@ -66,7 +106,12 @@ const AvailableJiraCards = () => {
         </CardActions>
       </Card>
       {gameContext.availableTickets?.map((item) => (
-        <Card>
+        <Card sx={{
+          ...item.isSelected && {
+            backgroundColor: (theme) =>
+              theme.palette.secondary.light,
+          }
+        }}>
           <CardHeader
             action={
               <IconButton aria-label="settings">
@@ -81,7 +126,16 @@ const AvailableJiraCards = () => {
             </Stack>
           </CardContent>
           <CardActions sx={{ justifyContent: "center" }}>
-            <Button>Vote this issue</Button>
+            <Button onClick={() => {
+              if (gameContext.user && gameContext.currGameId) {
+                gameContext.wsClient.sendData({
+                  userMeta: gameContext.user,
+                  type: 'vote-now',
+                  gameId: gameContext.currGameId,
+                  data: item
+                })
+              }
+            }}>{item.isSelected ? 'Voting': 'Vote this issue'}</Button>
           </CardActions>
         </Card>
       ))}

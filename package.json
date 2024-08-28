@@ -23,10 +23,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build; cpy build/index.html ./ --rename=200.html",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "prettier": "prettier . --write"
+    "prettier": "prettier . --write",
+    "deploy": "surge ./build --domain psychedelic-show.surge.sh"
   },
   "eslintConfig": {
     "extends": [
@@ -48,8 +49,10 @@
     ]
   },
   "devDependencies": {
+    "cpy-cli": "^5.0.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "3.3.3",
+    "surge": "^0.24.6",
     "unique-names-generator": "^4.7.1",
     "ws": "^8.18.0"
   }

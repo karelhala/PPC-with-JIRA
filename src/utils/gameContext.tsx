@@ -5,6 +5,7 @@ export type TicketType = {
   key?: string;
   description: string;
   id: string;
+  isSelected?: boolean;
 };
 
 export type UserType = {
@@ -16,14 +17,14 @@ export type GameContexType = {
   wsClient: WsClient;
   user?: UserType;
   currGameId?: string;
-  activeUsers?: UserType[];
-  drawnCards?: unknown[];
+  activeUsers?: (UserType & { selectedCard?: number })[];
+  drawnCards?: unknown;
   availableTickets?: TicketType[];
   setAvailableTickets?: (tickets: TicketType[]) => void;
   setUser?: (newValue: UserType) => void;
   setCurrGame?: (id: string) => void;
-  setActiveUsers?: (activeUsers: UserType) => void;
-  setDrawnCards?: (cards: unknown[]) => void;
+  setActiveUsers?: (activeUsers: UserType & { selectedCard?: number }) => void;
+  setDrawnCards?: (cards: unknown) => void;
 };
 
 export const GameContext = createContext<GameContexType>({} as GameContexType);

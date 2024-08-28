@@ -55,6 +55,17 @@ export default function Dashboard() {
       setIsOpen(true);
     }
   }, [game.currGameId, game.user]);
+
+  React.useEffect(() => {
+    console.log(game.currGameId && game.user, 'this is what?');
+    if (game.currGameId && game.user) {
+      // game.wsClient.sendData({
+      //   userMeta: game.user,
+      //   type: 'get-all-cards',
+      //   gameId: game.currGameId
+      // })
+    }
+  }, [isDrawerOpen, game.currGameId, game.user])
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
