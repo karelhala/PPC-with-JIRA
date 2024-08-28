@@ -34,7 +34,7 @@ const ActiveSession = () => {
     if (id) {
       gameContext.setCurrGame?.(id);
     }
-  }, [id])
+  }, [id]);
 
   return (
     <Container maxWidth={false} sx={{ mt: 2, mb: 4 }}>

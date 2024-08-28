@@ -66,13 +66,7 @@ export class WsClient {
     onError?: (event: unknown) => void,
   ): WsClient {
     if (!WsClient.instance) {
-      WsClient.instance = new WsClient(
-        id,
-        onMessage,
-        onOpen,
-        onClose,
-        onError,
-      );
+      WsClient.instance = new WsClient(id, onMessage, onOpen, onClose, onError);
     }
 
     return WsClient.instance;
@@ -80,7 +74,7 @@ export class WsClient {
 
   setId = (id: string) => {
     this.id = id;
-  }
+  };
 
   sendData = (data: WsMessage) => {
     if (this.client.readyState) {

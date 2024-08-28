@@ -54,7 +54,7 @@ export default function Dashboard() {
     if (!game.user && game.currGameId) {
       setIsOpen(true);
     }
-  }, [game.currGameId, game.user])
+  }, [game.currGameId, game.user]);
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -96,16 +96,8 @@ export default function Dashboard() {
           <Toolbar />
           <BrowserRouter>
             <Routes>
-              <Route
-                path="/:id"
-                element={
-                  <ActiveSession />
-                }
-              />
-              <Route
-                path="/"
-                element={<HomePage />}
-              ></Route>
+              <Route path="/:id" element={<ActiveSession />} />
+              <Route path="/" element={<HomePage />}></Route>
             </Routes>
           </BrowserRouter>
           <ActiveUser
@@ -114,7 +106,10 @@ export default function Dashboard() {
             setIsOpen={(isOpen, values) => {
               const uuid = crypto.randomUUID();
               localStorage.setItem("ppc-with-jira-user-uuid", uuid);
-              localStorage.setItem("ppc-with-jira-user-name", values?.name || "");
+              localStorage.setItem(
+                "ppc-with-jira-user-name",
+                values?.name || "",
+              );
               setIsOpen(isOpen);
               game.setUser?.({
                 name: values?.name || "",

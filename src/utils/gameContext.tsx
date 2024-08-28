@@ -1,29 +1,28 @@
 import { createContext } from "react";
 import { WsClient } from "./websocket";
 
+export type TicketType = {
+  key?: string;
+  description: string;
+  id: string;
+};
+
+export type UserType = {
+  name: string;
+  uuid: string;
+};
+
 export type GameContexType = {
   wsClient: WsClient;
-  user?: {
-    name: string;
-    uuid: string;
-  };
+  user?: UserType;
   currGameId?: string;
-  activeUsers?: {
-    name: string;
-    uuid: string;
-  }[];
+  activeUsers?: UserType[];
   drawnCards?: unknown[];
-  availableTickets?: {
-    key?: string;
-    description: string;
-    id: string;
-  }[];
-  setAvailableTickets?: (
-    tickets: { key?: string; description: string; id: string }[],
-  ) => void;
-  setUser?: (newValue: { name: string; uuid: string }) => void;
+  availableTickets?: TicketType[];
+  setAvailableTickets?: (tickets: TicketType[]) => void;
+  setUser?: (newValue: UserType) => void;
   setCurrGame?: (id: string) => void;
-  setActiveUsers?: (activeUsers: { name: string; uuid: string }[]) => void;
+  setActiveUsers?: (activeUsers: UserType) => void;
   setDrawnCards?: (cards: unknown[]) => void;
 };
 

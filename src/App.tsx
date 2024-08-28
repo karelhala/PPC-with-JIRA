@@ -1,6 +1,11 @@
 import React from "react";
 import Dashboard from "./Dashboard";
-import { GameContexType, GameContext } from "./utils/gameContext";
+import {
+  GameContexType,
+  GameContext,
+  TicketType,
+  UserType,
+} from "./utils/gameContext";
 import { WsClient, WsMessage, isWsMessage } from "./utils/websocket";
 
 const eventMapper = (context: GameContexType) => ({
@@ -9,15 +14,36 @@ const eventMapper = (context: GameContexType) => ({
       event.userMeta.uuid !== context.user?.uuid &&
       context.user?.uuid !== undefined
     ) {
-      console.log("foo");
+      console.log("setting active users!", event.userMeta);
+      context.setActiveUsers?.(event.userMeta);
     }
   },
 });
 
 const App = () => {
   const [game, setGame] = React.useState<GameContexType>({
-    wsClient: WsClient.getInstance()
+    wsClient: WsClient.getInstance(),
   });
+
+  const callbacks = {
+    setAvailableTickets: (tickets: TicketType[]) =>
+      setGame((game) => ({ ...game, availableTickets: tickets })),
+    setActiveUsers: (user: UserType) =>
+      setGame((game) => {
+        const foundUserIndex = game.activeUsers?.findIndex(({ uuid }) => user.uuid === uuid)
+        if (foundUserIndex !== -1 && game.activeUsers?.[foundUserIndex as number]) {
+          game.activeUsers[foundUserIndex as number] = user;
+          return game;
+        }
+        return { ...game, activeUsers: [...game.activeUsers || [], user] };
+      }),
+    setCurrGame: (id: string) =>
+      setGame((game) => ({ ...game, currGameId: id })),
+    setUser: (newUser: UserType) =>
+      setGame((game) => ({ ...game, user: newUser })),
+    setDrawnCards: (cards: unknown[]) =>
+      setGame((game) => ({ ...game, drawnCards: cards })),
+  };
 
   React.useEffect(() => {
     const userUUID = localStorage.getItem("ppc-with-jira-user-uuid");
@@ -43,13 +69,13 @@ const App = () => {
           uuid: game.user?.uuid,
         },
       });
+      callbacks.setActiveUsers(game.user);
     }
-  }, [game.user?.uuid, game.user?.name])
+  }, [game.user?.uuid, game.user?.name]);
 
   const onReceiveData = (event: WsMessage | string) => {
     if (isWsMessage(event)) {
-      console.log(event, 'this is event!');
-      const mapper = eventMapper(game);
+      const mapper = eventMapper({ ...game, ...callbacks });
       const evType = event.type as keyof typeof mapper;
       mapper[evType](event);
     }
@@ -58,23 +84,16 @@ const App = () => {
   React.useEffect(() => {
     if (game.currGameId && game.wsClient) {
       game?.wsClient.receiveData((event) => {
-        onReceiveData(event)
+        onReceiveData(event);
       }, game.currGameId as string);
     }
-  }, [game.currGameId, game.wsClient])
+  }, [game.currGameId, game.wsClient]);
 
   return (
     <GameContext.Provider
       value={{
         ...game,
-        setAvailableTickets: (tickets) =>
-          setGame((game) => ({ ...game, availableTickets: tickets })),
-        setActiveUsers: (users) =>
-          setGame((game) => ({ ...game, activeUsers: users })),
-        setCurrGame: (id) => setGame((game) => ({ ...game, currGameId: id })),
-        setUser: (newUser) => setGame((game) => ({ ...game, user: newUser })),
-        setDrawnCards: (cards) =>
-          setGame((game) => ({ ...game, drawnCards: cards })),
+        ...callbacks,
       }}
     >
       <Dashboard />
