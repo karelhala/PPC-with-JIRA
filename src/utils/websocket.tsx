@@ -11,7 +11,7 @@ export type WsMessage = {
 const processData = (
   event: { data: string },
   callback: (event: WsMessage | string) => void,
-  id: string,
+  id?: string,
 ) => {
   try {
     const data = JSON.parse(event.data);
@@ -31,19 +31,21 @@ export class WsClient {
   private static instance: WsClient;
 
   private client;
+  private id;
   constructor(
-    id: string,
+    id?: string,
     onMessage?: (event: WsMessage | string) => void,
     onOpen?: (event: unknown) => void,
     onClose?: (event: unknown) => void,
     onError?: (event: unknown) => void,
   ) {
+    this.id = id;
     this.client = new WebSocket(
       `${process.env.NODE_ENV === "development" ? process.env.REACT_APP_WS_URL : process.env.REACT_APP_WS_URL_PROD}?api_key=${process.env.REACT_APP_WS_API_KEY}`,
     );
     this.client.onmessage = (event) => {
       if (onMessage) {
-        processData(event, onMessage, id);
+        processData(event, onMessage, this.id);
       }
     };
 
@@ -57,7 +59,7 @@ export class WsClient {
   }
 
   public static getInstance(
-    id: string,
+    id?: string,
     onMessage?: (event: WsMessage | string) => void,
     onOpen?: (event: unknown) => void,
     onClose?: (event: unknown) => void,
@@ -74,6 +76,10 @@ export class WsClient {
     }
 
     return WsClient.instance;
+  }
+
+  setId = (id: string) => {
+    this.id = id;
   }
 
   sendData = (data: WsMessage) => {

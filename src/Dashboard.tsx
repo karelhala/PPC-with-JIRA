@@ -49,6 +49,12 @@ export default function Dashboard() {
   const game = React.useContext(GameContext);
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!game.user && game.currGameId) {
+      setIsOpen(true);
+    }
+  }, [game.currGameId, game.user])
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -93,12 +99,12 @@ export default function Dashboard() {
               <Route
                 path="/:id"
                 element={
-                  <ActiveSession onSetActiveUser={() => setIsOpen(true)} />
+                  <ActiveSession />
                 }
               />
               <Route
                 path="/"
-                element={<HomePage onSetActiveUser={() => setIsOpen(true)} />}
+                element={<HomePage />}
               ></Route>
             </Routes>
           </BrowserRouter>
@@ -107,6 +113,8 @@ export default function Dashboard() {
             defaultUserName={game.user?.name}
             setIsOpen={(isOpen, values) => {
               const uuid = crypto.randomUUID();
+              localStorage.setItem("ppc-with-jira-user-uuid", uuid);
+              localStorage.setItem("ppc-with-jira-user-name", values?.name || "");
               setIsOpen(isOpen);
               game.setUser?.({
                 name: values?.name || "",

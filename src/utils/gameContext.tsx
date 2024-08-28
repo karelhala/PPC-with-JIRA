@@ -1,6 +1,8 @@
 import { createContext } from "react";
+import { WsClient } from "./websocket";
 
 export type GameContexType = {
+  wsClient: WsClient;
   user?: {
     name: string;
     uuid: string;
